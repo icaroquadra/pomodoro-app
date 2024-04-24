@@ -1,10 +1,10 @@
-import React from "react";
-import { ButtonContainer, ButtonVariant } from "./Button.styles.ts";
+import React from 'react'
+import { ButtonContainer, ButtonVariant } from './Button.styles.ts'
 
 interface ButtonProps extends React.HTMLProps<HTMLButtonElement> {
-  variant?: ButtonVariant;
+  variant?: ButtonVariant
 }
 
-export function Button({ variant = "primary" }: ButtonProps) {
-  return <ButtonContainer variant={variant}> Enter </ButtonContainer>;
+export function Button({ variant = 'primary' }: ButtonProps) {
+  return <ButtonContainer variant={variant}> Enter </ButtonContainer>
 }
