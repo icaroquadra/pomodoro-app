@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 
-export const HeaderContainer = styled.div`
+export const HeaderContainer = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -17,12 +17,11 @@ export const HeaderContainer = styled.div`
       display: flex;
       justify-content: center;
       align-items: center;
-
       width: 2rem;
       height: 2rem;
-      color: ${(props) => props.theme['gray-100']};
       border-top: 3px solid transparent;
       border-bottom: 3px solid transparent;
+      color: ${(props) => props.theme['gray-100']};
 
       &:focus {
         outline: none;
