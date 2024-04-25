@@ -1,10 +1,10 @@
 export const defaultTheme = {
-  primary: "#400606",
-  primaryLight: "#520e0c",
-  secondary: "#060640",
-  secondaryDark: "#000000",
-  danger: "#740806",
-  success: "#066406",
+  primary: '#400606',
+  primaryLight: '#520e0c',
+  secondary: '#060640',
+  secondaryDark: '#000000',
+  danger: '#740806',
+  success: '#066406',
 
   white: '#FFF',
   'gray-100': '#E1E1E6',
@@ -24,4 +24,4 @@ export const defaultTheme = {
   'red-700': '#7A1921',
 
   'yellow-500': '#FBA94C',
-};
+}
