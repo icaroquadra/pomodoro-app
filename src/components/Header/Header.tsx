@@ -8,7 +8,7 @@ import { NavLink } from 'react-router-dom'
 export function Header() {
   return (
     <HeaderContainer>
-      <img src={WingLogo} alt="Wing Logo" />
+      <img src={WingLogo} alt="Right Wing Logo" />
 
       <nav>
         <NavLink to="/" title="Timer">
