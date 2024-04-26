@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlay } from '@fortawesome/free-solid-svg-icons'
+import { useForm } from 'react-hook-form'
 import {
   HomeContainer,
   TimerContainer,
@@ -11,13 +12,29 @@ import {
 } from './Home.styles'
 
 export function Home() {
+  const { register, handleSubmit, watch } = useForm()
+  // console.log(register('task').))
+
+  function createNewTask(data) {
+    // eslint-disable-next-line no-console
+    console.log(data)
+  }
+
+  const task = watch('task')
+  const isSubmitDisabled = !task
+
   return (
     <HomeContainer>
-      <form action="">
+      <form onSubmit={handleSubmit(createNewTask)} action="">
         <FormContainer>
           <label> I will work with </label>
 
-          <TaskInput id="task" />
+          <TaskInput
+            id="task"
+            list="task-suggestions"
+            placeholder="Give a name for your Project"
+            {...register('task')}
+          />
 
           <datalist id="task-suggestions">
             <option value="Project 1" />
@@ -34,6 +51,7 @@ export function Home() {
             step={5}
             min={5}
             max={60}
+            {...register('time', { required: true, valueAsNumber: true })}
           />
           <span> minutes. </span>
         </FormContainer>
@@ -46,7 +64,7 @@ export function Home() {
           <span>0</span>
         </TimerContainer>
 
-        <ButtonCountdownStart disabled type="submit">
+        <ButtonCountdownStart disabled={isSubmitDisabled} type="submit">
           <FontAwesomeIcon icon={faPlay} />
           Start
         </ButtonCountdownStart>

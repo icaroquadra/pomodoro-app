@@ -85,7 +85,7 @@ export const ButtonCountdownStart = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5rem;
+  gap: 0.5rem;
   width: 100%;
   border: 0;
   padding: 1rem;
