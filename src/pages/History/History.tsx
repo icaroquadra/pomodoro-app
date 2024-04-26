@@ -1,4 +1,4 @@
-import { HistoryContainer, HistoryList } from './History.stiles.ts'
+import { HistoryContainer, HistoryList, Status } from './History.stiles.ts'
 
 export function History() {
   return (
@@ -20,25 +20,33 @@ export function History() {
               <td>Task</td>
               <td>20min</td>
               <td>2 months ago</td>
-              <td>Finished</td>
+              <td>
+                <Status statusColor="red">interrupted</Status>
+              </td>
             </tr>
             <tr>
               <td>Task</td>
               <td>20min</td>
               <td>2 months ago</td>
-              <td>Finished</td>
+              <td>
+                <Status statusColor="green">Finished</Status>
+              </td>
             </tr>
             <tr>
               <td>Task</td>
               <td>20min</td>
               <td>2 months ago</td>
-              <td>Finished</td>
+              <td>
+                <Status statusColor="yellow">In Progress</Status>
+              </td>
             </tr>
             <tr>
               <td>Task</td>
               <td>20min</td>
               <td>2 months ago</td>
-              <td>Finished</td>
+              <td>
+                <Status statusColor="green">Finished</Status>
+              </td>
             </tr>
           </tbody>
         </table>
