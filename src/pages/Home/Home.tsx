@@ -88,12 +88,18 @@ export function Home() {
   )
 
   useEffect(() => {
+    let intervalId: number
+
     if (activeTimeCycleData) {
-      setInterval(() => {
+      intervalId = setInterval(() => {
         setAmountSecondsPassed(
           differenceInSeconds(new Date(), activeTimeCycleData.startTime),
         )
       }, 1000)
+    }
+
+    return () => {
+      clearInterval(intervalId)
     }
   }, [activeTimeCycleData])
 
@@ -111,11 +117,13 @@ export function Home() {
 
     setTimeCycles((state) => [...state, newTimeCicle])
     setActiveTimeCycleId(id)
+    setAmountSecondsPassed(0)
 
     reset()
   }
 
   const totalSeconds = activeTimeCycleData ? activeTimeCycleData.time * 60 : 0
+
   const currentSeconds = activeTimeCycleData
     ? totalSeconds - amoutSecondsPassed
     : 0
@@ -129,8 +137,11 @@ export function Home() {
   const task = watch('task')
   const isSubmitDisabled = !task
 
-  // eslint-disable-next-line no-console
-  console.log('activeTimeCycleData', activeTimeCycleData)
+  useEffect(() => {
+    if (activeTimeCycleData?.status === 'inProgress') {
+      document.title = `${minutesLeft}:${secondsLeft} - ${activeTimeCycleData.task}`
+    }
+  }, [minutesLeft, secondsLeft, activeTimeCycleData])
 
   return (
     <HomeContainer>
