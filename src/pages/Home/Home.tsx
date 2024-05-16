@@ -1,4 +1,4 @@
-import { faPlay } from '@fortawesome/free-solid-svg-icons'
+import { faPlay, faStop } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
@@ -7,6 +7,7 @@ import * as zod from 'zod'
 import { differenceInSeconds } from 'date-fns'
 import {
   ButtonCountdownStart,
+  ButtonCountdownStop,
   FormContainer,
   HomeContainer,
   MinutesInput,
@@ -34,9 +35,10 @@ interface TimeCycle {
   id: string
   task: string
   time: number
-  status: 'inProgress' | 'finished' | 'interrupted'
+  status: 'inProgress' | 'finished' | 'paused'
   startTime: Date
   endTime: Date
+  pausedTime?: Date
 }
 
 export function Home() {
@@ -134,14 +136,29 @@ export function Home() {
   const minutesLeft = String(minutesAmount).padStart(2, '0')
   const secondsLeft = String(remainingSeconds).padStart(2, '0')
 
-  const task = watch('task')
-  const isSubmitDisabled = !task
-
   useEffect(() => {
     if (activeTimeCycleData?.status === 'inProgress') {
       document.title = `${minutesLeft}:${secondsLeft} - ${activeTimeCycleData.task}`
     }
   }, [minutesLeft, secondsLeft, activeTimeCycleData])
+
+  function handlePauseTimeCycle() {
+    setTimeCycles((state) =>
+      state.map((timeCycle: TimeCycle) => {
+        if (timeCycle.id === activeTimeCycleData?.id) {
+          return { ...timeCycle, status: 'paused', pausedTime: new Date() }
+        } else {
+          return timeCycle
+        }
+      }),
+    )
+
+    setActiveTimeCycleId(null)
+  }
+
+  const task = watch('task')
+  const isSubmitDisabled = !task
+  const isCycleInProgress = activeTimeCycleData?.status === 'inProgress'
 
   return (
     <HomeContainer>
@@ -153,6 +170,7 @@ export function Home() {
             id="task"
             list="task-suggestions"
             placeholder="Give a name for your Project"
+            disabled={isCycleInProgress}
             {...register('task')}
           />
 
@@ -171,6 +189,7 @@ export function Home() {
             step={5}
             min={5}
             max={60}
+            disabled={isCycleInProgress}
             {...register('time', { required: true, valueAsNumber: true })}
           />
 
@@ -185,10 +204,17 @@ export function Home() {
           <span>{secondsLeft[1]}</span>
         </TimerContainer>
 
-        <ButtonCountdownStart disabled={isSubmitDisabled} type="submit">
-          <FontAwesomeIcon icon={faPlay} />
-          Start
-        </ButtonCountdownStart>
+        {activeTimeCycleData?.status === 'inProgress' ? (
+          <ButtonCountdownStop type="button" onClick={handlePauseTimeCycle}>
+            <FontAwesomeIcon icon={faStop} />
+            Pause
+          </ButtonCountdownStop>
+        ) : (
+          <ButtonCountdownStart disabled={isSubmitDisabled} type="submit">
+            <FontAwesomeIcon icon={faPlay} />
+            Start
+          </ButtonCountdownStart>
+        )}
       </form>
     </HomeContainer>
   )
