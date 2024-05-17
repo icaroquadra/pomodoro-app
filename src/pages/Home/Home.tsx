@@ -89,14 +89,39 @@ export function Home() {
     (timeCycle) => timeCycle.id === activeTimeCycleId,
   )
 
+  const totalSeconds = activeTimeCycleData ? activeTimeCycleData.time * 60 : 0
+
   useEffect(() => {
     let intervalId: number
 
     if (activeTimeCycleData) {
       intervalId = setInterval(() => {
-        setAmountSecondsPassed(
-          differenceInSeconds(new Date(), activeTimeCycleData.startTime),
+        const secondsDiference = differenceInSeconds(
+          new Date(),
+          activeTimeCycleData.startTime,
         )
+
+        if (secondsDiference >= totalSeconds) {
+          setTimeCycles((state) =>
+            state.map((timeCycle: TimeCycle) => {
+              if (timeCycle.id === activeTimeCycleData.id) {
+                return {
+                  ...timeCycle,
+                  status: 'finished',
+                  endTime: new Date(),
+                }
+              } else {
+                return timeCycle
+              }
+            }),
+          )
+          clearInterval(intervalId)
+          setActiveTimeCycleId(null)
+          setAmountSecondsPassed(totalSeconds)
+          return
+        } else {
+          setAmountSecondsPassed(secondsDiference)
+        }
       }, 1000)
     }
 
@@ -123,8 +148,6 @@ export function Home() {
 
     reset()
   }
-
-  const totalSeconds = activeTimeCycleData ? activeTimeCycleData.time * 60 : 0
 
   const currentSeconds = activeTimeCycleData
     ? totalSeconds - amoutSecondsPassed
