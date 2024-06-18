@@ -1,16 +1,15 @@
+import { faPlay, faStop } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlay } from '@fortawesome/free-solid-svg-icons'
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { createContext, useState } from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
 import * as zod from 'zod'
+import { NewCycleForm } from './NewCycleForm/newCycleForm'
+import { Countdown } from './Countdown/countdown'
 import {
-  HomeContainer,
-  TimerContainer,
-  SeparatorContainer,
   ButtonCountdownStart,
-  FormContainer,
-  TaskInput,
-  MinutesInput,
+  ButtonCountdownStop,
+  HomeContainer,
 } from './Home.styles'
 
 type NewTaskFormData = zod.infer<typeof newTaskFormSchemaValidator>
@@ -28,21 +27,106 @@ const newTaskFormSchemaValidator = zod.object({
     .max(60, 'Time must be at most 60 minutes'),
 })
 
+interface TimeCycle {
+  id: string
+  task: string
+  time: number
+  status: 'inProgress' | 'finished' | 'paused'
+  startTime: Date
+  endTime: Date
+  pausedTime?: Date
+}
+
+interface TimeCyclesContextData {
+  activeTimeCycleData: TimeCycle | undefined
+  activeTimeCycleId: string | null
+  aboutSecondsPassed: number
+  markCurrentCycleAsFinished: () => void
+  setActiveCycleId: (id: string | null) => void
+  setSecondsPassed: (seconds: number) => void
+}
+
+export const CyclesContext = createContext({} as TimeCyclesContextData)
+
 export function Home() {
+  const [aboutSecondsPassed, setAboutSecondsPassed] = useState(0)
+  const [timeCycles, setTimeCycles] = useState<TimeCycle[]>([])
+  const [activeTimeCycleId, setActiveTimeCycleId] = useState<string | null>(
+    null,
+  )
+
   // console.log(formState.errors) // this is useForm parameter to catch errors
-  const { register, handleSubmit, watch, reset } = useForm<NewTaskFormData>({
+  // console.log(register('task').)) // to check all the methods available on zod register method
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const newCycleForm = useForm<NewTaskFormData>({
     resolver: zodResolver(newTaskFormSchemaValidator),
     defaultValues: {
       task: '',
-      time: 25,
+      time: 0,
     },
   })
-  // console.log(register('task').)) // to check all the methods available
 
-  function createNewTask(data: NewTaskFormData) {
-    // eslint-disable-next-line no-console
-    console.log(data)
+  function setActiveCycleId(id: string | null) {
+    setActiveTimeCycleId(id)
+  }
+
+  function setSecondsPassed(seconds: number) {
+    setAboutSecondsPassed(seconds)
+  }
+
+  const { handleSubmit, watch, reset } = newCycleForm
+
+  const activeTimeCycleData = timeCycles.find(
+    (timeCycle) => timeCycle.id === activeTimeCycleId,
+  )
+
+  function markCurrentCycleAsFinished() {
+    setTimeCycles((state) =>
+      state.map((timeCycle: TimeCycle) => {
+        if (timeCycle.id === activeTimeCycleId) {
+          return {
+            ...timeCycle,
+            status: 'finished',
+            endTime: new Date(),
+          }
+        } else {
+          return timeCycle
+        }
+      }),
+    )
+  }
+
+  function handleCreateNewTask(data: NewTaskFormData) {
+    const id = String(new Date().getTime())
+
+    const newTimeCicle: TimeCycle = {
+      id,
+      task: data.task,
+      time: data.time,
+      status: 'inProgress',
+      startTime: new Date(),
+      endTime: new Date(),
+    }
+
+    setTimeCycles((state) => [...state, newTimeCicle])
+    setActiveTimeCycleId(id)
+    setAboutSecondsPassed(0)
+
     reset()
+  }
+
+  function handlePauseTimeCycle() {
+    setTimeCycles((state) =>
+      state.map((timeCycle: TimeCycle) => {
+        if (timeCycle.id === activeTimeCycleData?.id) {
+          return { ...timeCycle, status: 'paused', pausedTime: new Date() }
+        } else {
+          return timeCycle
+        }
+      }),
+    )
+
+    setActiveTimeCycleId(null)
   }
 
   const task = watch('task')
@@ -50,50 +134,35 @@ export function Home() {
 
   return (
     <HomeContainer>
-      <form onSubmit={handleSubmit(createNewTask)} action="">
-        <FormContainer>
-          <label> I will work with </label>
+      <form onSubmit={handleSubmit(handleCreateNewTask)} action="">
+        <CyclesContext.Provider
+          value={{
+            setActiveCycleId,
+            setSecondsPassed,
+            activeTimeCycleData,
+            activeTimeCycleId,
+            markCurrentCycleAsFinished,
+            aboutSecondsPassed,
+          }}
+        >
+          <FormProvider {...newCycleForm}>
+            <NewCycleForm />
+          </FormProvider>
 
-          <TaskInput
-            id="task"
-            list="task-suggestions"
-            placeholder="Give a name for your Project"
-            {...register('task')}
-          />
+          <Countdown />
+        </CyclesContext.Provider>
 
-          <datalist id="task-suggestions">
-            <option value="Project 1" />
-            <option value="Project 2" />
-            <option value="Project 3" />
-          </datalist>
-
-          <label htmlFor="task"> for </label>
-
-          <MinutesInput
-            type="number"
-            id="time"
-            placeholder="00"
-            step={5}
-            min={5}
-            max={60}
-            {...register('time', { required: true, valueAsNumber: true })}
-          />
-
-          <span> minutes. </span>
-        </FormContainer>
-
-        <TimerContainer>
-          <span>0</span>
-          <span>0</span>
-          <SeparatorContainer>:</SeparatorContainer>
-          <span>0</span>
-          <span>0</span>
-        </TimerContainer>
-
-        <ButtonCountdownStart disabled={isSubmitDisabled} type="submit">
-          <FontAwesomeIcon icon={faPlay} />
-          Start
-        </ButtonCountdownStart>
+        {activeTimeCycleData?.status === 'inProgress' ? (
+          <ButtonCountdownStop type="button" onClick={handlePauseTimeCycle}>
+            <FontAwesomeIcon icon={faStop} />
+            Pause
+          </ButtonCountdownStop>
+        ) : (
+          <ButtonCountdownStart disabled={isSubmitDisabled} type="submit">
+            <FontAwesomeIcon icon={faPlay} />
+            Start
+          </ButtonCountdownStart>
+        )}
       </form>
     </HomeContainer>
   )
