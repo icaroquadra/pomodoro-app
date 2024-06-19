@@ -14,15 +14,15 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaFeatures: {
-      jsx: true
+      jsx: true,
     },
     ecmaVersion: 'latest',
-    sourceType: 'module'
+    sourceType: 'module',
   },
   plugins: ['react-refresh', 'react', 'jsx-a11y', '@typescript-eslint'],
   rules: {
     'no-console': 'warn',
-    "react/self-closing-comp": "error",
+    'react/self-closing-comp': 'error',
     'react/no-unknown-property': 'error',
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',
@@ -38,15 +38,18 @@ module.exports = {
     'jsx-a11y/aria-unsupported-elements': 'warn',
     'jsx-a11y/role-has-required-aria-props': 'warn',
     'jsx-a11y/role-supports-aria-props': 'warn',
-    'prettier/prettier': ["error", {
-      'printWidth': 80,
-      'tabWidth': 2,
-      'singleQuote': true,
-      'trailingComma': 'all',
-      'arrowParens': 'always',
-      'semi': false,
-      'endOfLine': 'auto',
-    }],
+    'prettier/prettier': [
+      'error',
+      {
+        printWidth: 80,
+        tabWidth: 2,
+        singleQuote: true,
+        trailingComma: 'all',
+        arrowParens: 'always',
+        semi: false,
+        endOfLine: 'auto',
+      },
+    ],
     'react-refresh/only-export-components': [
       'warn',
       { allowConstantExport: true },

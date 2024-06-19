@@ -1,9 +1,16 @@
+import { useContext } from 'react'
 import { HistoryContainer, HistoryList, Status } from './History.stiles.ts'
+import { CyclesContext } from '../../contexts/cyclesContext.tsx'
 
 export function History() {
+  const { timeCycles } = useContext(CyclesContext)
+
   return (
     <HistoryContainer>
       <h1>My History</h1>
+
+      {/* to check the timeCycles data */}
+      <pre>{JSON.stringify(timeCycles, null, 2)}</pre>
 
       <HistoryList>
         <table>
