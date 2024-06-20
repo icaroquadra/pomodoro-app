@@ -1,13 +1,5 @@
 import { ReactNode, createContext, useState } from 'react'
-interface TimeCycle {
-  id: string
-  task: string
-  time: number
-  status: 'inProgress' | 'finished' | 'paused'
-  startTime: Date
-  endTime: Date
-  pausedTime?: Date
-}
+import { TimeCycle } from '../types/TimeCycle'
 
 interface TimeCyclesContextData {
   activeTimeCycleData: TimeCycle | undefined
