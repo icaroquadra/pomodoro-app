@@ -3,6 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormProvider, useForm } from 'react-hook-form'
 import * as zod from 'zod'
+import { useContext } from 'react'
+import { CyclesContext } from '../../contexts/cyclesContext'
 import { NewCycleForm } from './NewCycleForm/newCycleForm'
 import { Countdown } from './Countdown/countdown'
 import {
@@ -10,8 +12,6 @@ import {
   ButtonCountdownStop,
   HomeContainer,
 } from './Home.styles'
-import { CyclesContext } from '../../contexts/cyclesContext'
-import { useContext } from 'react'
 
 type NewTaskFormData = zod.infer<typeof newTaskFormSchemaValidator>
 // zod can infer the type of the schema. This is the same as:
@@ -43,14 +43,19 @@ export function Home() {
     },
   })
 
-  const { handleSubmit, watch } = newCycleForm
+  const { handleSubmit, watch, reset } = newCycleForm
 
   const task = watch('task')
   const isSubmitDisabled = !task
 
+  function handleCreateNewCycle(data: NewTaskFormData) {
+    createNewCycle(data)
+    reset()
+  }
+
   return (
     <HomeContainer>
-      <form onSubmit={handleSubmit(createNewCycle)} action="">
+      <form onSubmit={handleSubmit(handleCreateNewCycle)} action="">
         <FormProvider {...newCycleForm}>
           <NewCycleForm />
         </FormProvider>

@@ -1,6 +1,8 @@
 import { useContext } from 'react'
 import { HistoryContainer, HistoryList, Status } from './History.stiles.ts'
 import { CyclesContext } from '../../contexts/cyclesContext.tsx'
+import { TimeCycle } from '../../types/TimeCycle'
+import { formatDistanceToNow } from 'date-fns/formatDistanceToNow'
 
 export function History() {
   const { timeCycles } = useContext(CyclesContext)
@@ -10,7 +12,7 @@ export function History() {
       <h1>My History</h1>
 
       {/* to check the timeCycles data */}
-      <pre>{JSON.stringify(timeCycles, null, 2)}</pre>
+      {/* <pre>{JSON.stringify(timeCycles, null, 2)}</pre> */}
 
       <HistoryList>
         <table>
@@ -23,38 +25,30 @@ export function History() {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Task</td>
-              <td>20min</td>
-              <td>2 months ago</td>
-              <td>
-                <Status statusColor="red">interrupted</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Task</td>
-              <td>20min</td>
-              <td>2 months ago</td>
-              <td>
-                <Status statusColor="green">Finished</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Task</td>
-              <td>20min</td>
-              <td>2 months ago</td>
-              <td>
-                <Status statusColor="yellow">In Progress</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Task</td>
-              <td>20min</td>
-              <td>2 months ago</td>
-              <td>
-                <Status statusColor="green">Finished</Status>
-              </td>
-            </tr>
+            {timeCycles.map((timeCycle: TimeCycle) => {
+              return (
+                <tr key={timeCycle.id}>
+                  <td>{timeCycle.id}</td>
+                  <td>{timeCycle.time} minutes</td>
+                  <td>
+                    {formatDistanceToNow(timeCycle.startTime, {
+                      addSuffix: true,
+                    })}
+                  </td>
+                  <td>
+                    {timeCycle.status === 'finished' && (
+                      <Status statusColor="green">Finished</Status>
+                    )}
+                    {timeCycle.status === 'paused' && (
+                      <Status statusColor="red">Paused</Status>
+                    )}
+                    {timeCycle.status === 'inProgress' && (
+                      <Status statusColor="yellow">In progress</Status>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </HistoryList>
