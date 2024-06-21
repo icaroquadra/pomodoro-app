@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useState } from 'react'
+import { ReactNode, createContext, useReducer, useState } from 'react'
 import { TimeCycle } from '../types/TimeCycle'
 
 interface TimeCyclesContextData {
@@ -22,43 +22,76 @@ interface CyclesContextProviderProps {
   children: ReactNode
 }
 
+interface CyclesState {
+  cycles: TimeCycle[]
+  activeCycleId: string | null
+}
+
+type Action =
+  | { type: 'CREATE'; payload: { newTimeCycle: TimeCycle } }
+  | { type: 'PAUSE'; payload: { activeTimeCycleId: string | null } }
+  | { type: 'FINISH'; payload: { activeTimeCycleId: string | null } }
+
 export const CyclesContext = createContext({} as TimeCyclesContextData)
 
 export function CyclesContextProvider({
   children,
 }: CyclesContextProviderProps): JSX.Element {
+  const reducer = (state: CyclesState, action: Action): CyclesState => {
+    switch (action.type) {
+      case 'CREATE':
+        return {
+          ...state,
+          cycles: [...state.cycles, action.payload.newTimeCycle],
+          activeCycleId: action.payload.newTimeCycle.id,
+        }
+      case 'PAUSE':
+        return {
+          ...state,
+          cycles: state.cycles.map((timeCycle) =>
+            timeCycle.id === action.payload.activeTimeCycleId
+              ? { ...timeCycle, status: 'paused', pausedTime: new Date() }
+              : timeCycle,
+          ),
+        }
+      case 'FINISH':
+        return {
+          ...state,
+          cycles: state.cycles.map((timeCycle) =>
+            timeCycle.id === action.payload.activeTimeCycleId
+              ? { ...timeCycle, status: 'finished', endTime: new Date() }
+              : timeCycle,
+          ),
+        }
+      default:
+        return state
+    }
+  }
+
+  const initialState: CyclesState = {
+    cycles: [],
+    activeCycleId: null,
+  }
+  const [timeCyclesState, dispatch] = useReducer(reducer, initialState)
   const [aboutSecondsPassed, setAboutSecondsPassed] = useState(0)
-  const [timeCycles, setTimeCycles] = useState<TimeCycle[]>([])
-  const [activeTimeCycleId, setActiveTimeCycleId] = useState<string | null>(
-    null,
-  )
+  const { cycles: timeCycles, activeCycleId: activeTimeCycleId } =
+    timeCyclesState
 
   const activeTimeCycleData = timeCycles.find(
     (timeCycle) => timeCycle.id === activeTimeCycleId,
   )
-
-  function setActiveCycleId(id: string | null) {
-    setActiveTimeCycleId(id)
-  }
 
   function setSecondsPassed(seconds: number) {
     setAboutSecondsPassed(seconds)
   }
 
   function markCurrentCycleAsFinished() {
-    setTimeCycles((state) =>
-      state.map((timeCycle: TimeCycle) => {
-        if (timeCycle.id === activeTimeCycleId) {
-          return {
-            ...timeCycle,
-            status: 'finished',
-            endTime: new Date(),
-          }
-        } else {
-          return timeCycle
-        }
-      }),
-    )
+    dispatch({
+      type: 'FINISH',
+      payload: {
+        activeTimeCycleId,
+      },
+    })
   }
 
   function createNewCycle(data: createCycleData) {
@@ -73,25 +106,23 @@ export function CyclesContextProvider({
       endTime: new Date(),
     }
 
-    setTimeCycles((state) => [...state, newTimeCicle])
-    setActiveTimeCycleId(id)
-    setAboutSecondsPassed(0)
+    dispatch({
+      type: 'CREATE',
+      payload: {
+        newTimeCycle,
+      },
+    })
 
-    // reset()
+    setAboutSecondsPassed(0)
   }
 
   function interruptCurrentCycle() {
-    setTimeCycles((state) =>
-      state.map((timeCycle: TimeCycle) => {
-        if (timeCycle.id === activeTimeCycleData?.id) {
-          return { ...timeCycle, status: 'paused', pausedTime: new Date() }
-        } else {
-          return timeCycle
-        }
-      }),
-    )
-
-    setActiveTimeCycleId(null)
+    dispatch({
+      type: 'PAUSE',
+      payload: {
+        activeTimeCycleId,
+      },
+    })
   }
 
   return (
